@@ -12,3 +12,7 @@ you must have the obs-plugin obs-shaderfilter installed
 
 put these new shaders in the examples folder
 ..\OBS\obs-studio\data\obs-plugins\obs-shaderfilter\examples
+
+Effects need "Override entire effect" enabled
+
+Shaders need "Override entire effect" disabled
