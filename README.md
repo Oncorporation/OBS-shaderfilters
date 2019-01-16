@@ -8,7 +8,7 @@ For instance, I use it to make live matrix effects on my stream by loading anoth
 ## Installation
 ### Prerequisites
 Find your OBS studio folder
-you must have the obs-plugin obs-shaderfilter installed
+you must have the obs-plugin obs-shaderfilter installed (https://github.com/nleseul/obs-shaderfilter/releases)
 
 put these new shaders in the examples folder
 ..\OBS\obs-studio\data\obs-plugins\obs-shaderfilter\examples
