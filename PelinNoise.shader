@@ -4,6 +4,7 @@
 //
 // Original work (webgl-noise) Copyright (C) 2011 Stefan Gustavson
 // Translation and modification was made by Keijiro Takahashi.
+// Conversion for OBS by Charles Fettinger.
 //
 // This shader is based on the webgl-noise GLSL shader. For further details
 // of the original shader, please see the following description from the
@@ -115,13 +116,13 @@ uniform bool animated;
 uniform bool apply_to_channel;
 uniform bool inverted;
 uniform bool multiply;
-uniform float cx;
-uniform float cy;
+uniform float speed_horizonal;
+uniform float speed_vertical;
 uniform float iterations;
-//how much c_noise do we want?
-uniform float c_noise;
-//how much p_noise do we want?
-uniform float p_noise;
+//how much c_noise do we want? white
+uniform float white_noise;
+//how much p_noise do we want? black
+uniform float black_noise;
 //todo: s_noise (simplex)
  float2 noisePosition(float t){
 	return float2(sin(2.2 * t) - cos(1.4 * t), cos(1.3 * t) + sin(-1.9 *t));
@@ -130,7 +131,7 @@ uniform float p_noise;
 {
 	float4 color = image.Sample(textureSampler, v_in.uv);
 	float t = elapsed_time * speed;
-	float2 dir = float2(cx,cy);
+	float2 dir = float2(speed_horizonal,speed_vertical);
 	
 	if(!animated){
 		float o = 0.5;
@@ -140,14 +141,14 @@ uniform float p_noise;
 			float2 coord = v_in.uv * scale;
 			float2 period = scale * 2.0;
 			
-			if(c_noise == 0.0 && p_noise == 0.0){
+			if(white_noise == 0.0 && black_noise == 0.0){
 				o += pnoise(coord, period) * w;
 			} else {				
-				if(c_noise != 0.0){
-					o += cnoise(coord) * w * c_noise;
+				if(white_noise != 0.0){
+					o += cnoise(coord) * w * white_noise;
 				}
-				if(p_noise != 0.0){
-					o += pnoise(coord, period) * w * p_noise;
+				if(black_noise != 0.0){
+					o += pnoise(coord, period) * w * black_noise;
 				}
 			}
 			
@@ -176,14 +177,14 @@ uniform float p_noise;
 			float2 coord = (v_in.uv + t*dir) * scale;
 			float2 period = scale * 2.0;
 			
-			if(c_noise == 0.0 && p_noise == 0.0){
+			if(white_noise == 0.0 && black_noise == 0.0){
 				o += pnoise(coord, period) * w;
 			} else {				
-				if(c_noise != 0.0){
-					o += cnoise(coord) * w * c_noise;
+				if(white_noise != 0.0){
+					o += cnoise(coord) * w * white_noise;
 				}
-				if(p_noise != 0.0){
-					o += pnoise(coord, period) * w * p_noise;
+				if(black_noise != 0.0){
+					o += pnoise(coord, period) * w * black_noise;
 				}
 			}
 			
