@@ -32,10 +32,10 @@ float4 mainImage(VertData v_in) : TARGET
 {
 	const float2 offsets[4] = 
 	{
-		-0.3,  0.4,
-		-0.3, -0.4,
-		0.3, -0.4,
-		0.3,  0.4
+		-0.125,  0.166,
+		-0.125, -0.166,
+		0.125, -0.166,
+		0.125,  0.166
 	};
 
 	float4 color = image.Sample(textureSampler, v_in.uv);
