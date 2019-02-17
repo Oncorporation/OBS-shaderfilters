@@ -1,9 +1,10 @@
 // Drunk shader by Charles Fettinger  (https://github.com/Oncorporation)  2/2019
-
-uniform float glow_amount = 2.0;
-uniform float blur_amount = 10.0;
+uniform float4x4 color_matrix;
+uniform float glow_amount = 0.33;
+uniform float blur_amount = 0.01;
 uniform float luminance_floor = 0.33;
-uniform float speed = 0.2;
+uniform float speed = 1.0;
+uniform float4 glow_color;
 
 // Gaussian Blur
 float Gaussian(float x, float o) {
@@ -46,13 +47,16 @@ float4 mainImage(VertData v_in) : TARGET
 	if (intensity > luminance_floor)
 	{
 		// glow calc
-		glow = 0.0113 * (glow_amount - max(color.r, color.g));
+		//glow = 0.0113 * (glow_amount - max(color.r, color.g));
 		// blur calc
-		for (int n = 0; n < 4; n++)
-			color += image.Sample(textureSampler, v_in.uv + (blur_amount * (1 + sin(t))) * glow *  offsets[n]);
-			color *= 0.25;
+		for (int n = 0; n < 4; n++){			
+			float4 ncolor = image.Sample(textureSampler, v_in.uv + (blur_amount * (1 + sin(t))) * offsets[n]) ;	
+
+			ncolor.a = clamp(ncolor.a * glow_amount, 0.0, 1.0);
+			color = max(color,ncolor) * glow_color ;//* ((1-ncolor.a) + color * ncolor.a);
+		}
 	}
 
-	return float4(color.r, color.g, color.b, color.a  );
-
+	return color;
 }
+
