@@ -32,31 +32,35 @@ float4 mainImage(VertData v_in) : TARGET
 {
 	const float2 offsets[4] = 
 	{
-		-0.125,  0.166,
-		-0.125, -0.166,
-		0.125, -0.166,
-		0.125,  0.166
+		-0.05,  0.066,
+		-0.05, -0.066,
+		0.05, -0.066,
+		0.05,  0.066
 	};
 
 	float4 color = image.Sample(textureSampler, v_in.uv);
+	float4 temp_color = color;
 
 	float intensity = dot(color * 1 ,float3(0.299,0.587,0.114));
 	float t = elapsed_time * speed;
 
 	float glow = 0;
-	if (intensity > luminance_floor)
+	if (intensity >= luminance_floor)
 	{
-		// glow calc
-		//glow = 0.0113 * (glow_amount - max(color.r, color.g));
-		// blur calc
 		for (int n = 0; n < 4; n++){			
+			//blur sample
 			float4 ncolor = image.Sample(textureSampler, v_in.uv + (blur_amount * (1 + sin(t))) * offsets[n]) ;	
-
+			//glow calc
 			ncolor.a = clamp(ncolor.a * glow_amount, 0.0, 1.0);
-			color = max(color,ncolor) * glow_color ;//* ((1-ncolor.a) + color * ncolor.a);
+			//temp_color = max(temp_color,ncolor) * glow_color ;//* ((1-ncolor.a) + color * ncolor.a);
+			//temp_color += (ncolor * float4(glow_color.rbg, glow_amount));
+
+			// use temp_color as floor, add glow, use highest alpha of blur pixels, then multiply by glow color
+			// max is used to simulate addition of vector texture color
+			temp_color = float4(max(temp_color.rgb,ncolor.rgb * glow_amount), max(temp_color.a, glow_amount)) * glow_color ;
 		}
 	}
-
-	return color;
+	// grab lighter color
+	return max(color,temp_color);
 }
 
