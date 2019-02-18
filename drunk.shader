@@ -1,12 +1,14 @@
 // Drunk shader by Charles Fettinger  (https://github.com/Oncorporation)  2/2019
 uniform float4x4 color_matrix;
-uniform float glow_amount = 1.00;
-uniform float blur_amount = 0.02;
-uniform float luminance_floor = 0.29;
-uniform float luminance_ceiling = 1.00;
-uniform float speed = 1.0;
+uniform int glow_percent = 10;
+uniform int blur = 1;
+uniform int min_brightness= 27;
+uniform int max_brightness = 100;
+uniform int pulse_speed = 0;
+
 uniform float4 glow_color;
 uniform bool ease;
+
 
 // Gaussian Blur
 float Gaussian(float x, float o) {
@@ -54,11 +56,16 @@ float4 mainImage(VertData v_in) : TARGET
 		0.05,  0.066
 	};
 
+	// convert input for vector math
+	float blur_amount = (float)blur /100;
+	float glow_amount = (float)glow_percent / 10;
+	float speed = (float)pulse_speed / 100;	
+	float luminance_floor = float(min_brightness) /100;
+	float luminance_ceiling = float(max_brightness) /100;
+
 	float4 color = image.Sample(textureSampler, v_in.uv);
 	float4 temp_color = color;
 
-	float intensity = dot(color * 1 ,float3(0.299,0.587,0.114));
-	
 	//circular easing variable
 	float t = 1 + sin(elapsed_time * speed);
 	float b = 0.0; //start value
@@ -67,15 +74,14 @@ float4 mainImage(VertData v_in) : TARGET
 
 	//if(color.a <= 0.0) color.rgb = float3(0.0,0.0,0.0);
 
-	float glow = 0;
-	if (((intensity >= luminance_floor) && (intensity <= luminance_ceiling)) || // test luminance
-		((color.r == glow_color.r) && (color.g == glow_color.g) && (color.b == glow_color.b))) //test for chosen color
-	{
-		for (int n = 0; n < 4; n++){			
-			//blur sample
-			b = BlurStyler(t,0,c,d,ease);
-			float4 ncolor = image.Sample(textureSampler, v_in.uv + (blur_amount * b) * offsets[n]) ;	
-
+	for (int n = 0; n < 4; n++){			
+		//blur sample
+		b = BlurStyler(t,0,c,d,ease);
+		float4 ncolor = image.Sample(textureSampler, v_in.uv + (blur_amount * b) * offsets[n]) ;	
+		float intensity = dot(ncolor * 1 ,float3(0.299,0.587,0.114));
+		if (((intensity >= luminance_floor) && (intensity <= luminance_ceiling)) || // test luminance
+			((color.r == glow_color.r) && (color.g == glow_color.g) && (color.b == glow_color.b))) //test for chosen color
+		{
 			//glow calc
 			ncolor.a = clamp(ncolor.a * glow_amount, 0.0, 1.0);
 			//temp_color = max(temp_color,ncolor) * glow_color ;//* ((1-ncolor.a) + color * ncolor.a);
