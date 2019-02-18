@@ -1,8 +1,9 @@
 // Drunk shader by Charles Fettinger  (https://github.com/Oncorporation)  2/2019
 uniform float4x4 color_matrix;
-uniform float glow_amount = 0.33;
-uniform float blur_amount = 0.01;
-uniform float luminance_floor = 0.33;
+uniform float glow_amount = 1.00;
+uniform float blur_amount = 0.02;
+uniform float luminance_floor = 0.29;
+uniform float luminance_ceiling = 1.00;
 uniform float speed = 1.0;
 uniform float4 glow_color;
 uniform bool ease;
@@ -67,12 +68,12 @@ float4 mainImage(VertData v_in) : TARGET
 
 
 	float glow = 0;
-	if (intensity >= luminance_floor)
+	if ((intensity >= luminance_floor) && (intensity <= luminance_ceiling))
 	{
 		for (int n = 0; n < 4; n++){			
 			//blur sample
 			b = BlurStyler(t,0,c,d,ease);
-			float4 ncolor = image.Sample(textureSampler, v_in.uv + (blur_amount * (b)) * offsets[n]) ;	
+			float4 ncolor = image.Sample(textureSampler, v_in.uv + (blur_amount * b) * offsets[n]) ;	
 
 			//glow calc
 			ncolor.a = clamp(ncolor.a * glow_amount, 0.0, 1.0);
@@ -81,7 +82,9 @@ float4 mainImage(VertData v_in) : TARGET
 
 			// use temp_color as floor, add glow, use highest alpha of blur pixels, then multiply by glow color
 			// max is used to simulate addition of vector texture color
-			temp_color = float4(max(temp_color.rgb,ncolor.rgb * glow_amount), max(temp_color.a, glow_amount)) * glow_color ;
+			temp_color = float4(max(temp_color.rgb,ncolor.rgb * (glow_amount * (b/2))),  // color effected by glow over time
+						max(temp_color.a, (glow_amount * (b/2))))  // alpha effected by glow over time
+						* (glow_color * (b/2)); // glow color effected by glow over time
 		}
 	}
 	// grab lighter color
