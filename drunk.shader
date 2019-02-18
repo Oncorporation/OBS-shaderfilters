@@ -57,7 +57,6 @@ float4 mainImage(VertData v_in) : TARGET
 	float4 color = image.Sample(textureSampler, v_in.uv);
 	float4 temp_color = color;
 
-
 	float intensity = dot(color * 1 ,float3(0.299,0.587,0.114));
 	
 	//circular easing variable
@@ -66,9 +65,11 @@ float4 mainImage(VertData v_in) : TARGET
 	float c = 2.0; //change value
 	float d = 2.0; //duration
 
+	//if(color.a <= 0.0) color.rgb = float3(0.0,0.0,0.0);
 
 	float glow = 0;
-	if ((intensity >= luminance_floor) && (intensity <= luminance_ceiling))
+	if (((intensity >= luminance_floor) && (intensity <= luminance_ceiling)) || // test luminance
+		((color.r == glow_color.r) && (color.g == glow_color.g) && (color.b == glow_color.b))) //test for chosen color
 	{
 		for (int n = 0; n < 4; n++){			
 			//blur sample
