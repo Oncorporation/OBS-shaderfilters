@@ -1,3 +1,5 @@
+// Luminance Filter 2 by Charles Fettinger (https://github.com/Oncorporation)
+// added intended options from code that was added to OBS Studio
 uniform float4 color;
 uniform float lumaMax;
 uniform float lumaMin;
